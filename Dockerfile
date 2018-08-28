@@ -2,6 +2,8 @@ FROM ubuntu:trusty
 MAINTAINER Feng Honglin <hfeng@tutum.co>
 
 RUN apt-get update && \
+    apt-get -y install vim && \
+    apt-get -y install telnet && \
     apt-get -y --no-install-recommends install openssh-server autossh pwgen sshpass && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists && \
@@ -21,8 +23,9 @@ ENV ROOT_PASS **None**
 ENV PUBLIC_HOST_ADDR **None**
 ENV PUBLIC_HOST_PORT **None**
 ENV PROXY_PORT **None**
+ENV PRIVATE_HOST_TUNNEL_PORT **None**
 
-EXPOSE 22
-EXPOSE 1080
+#EXPOSE 22
+#EXPOSE 1080
 
 CMD ["/run.sh"]

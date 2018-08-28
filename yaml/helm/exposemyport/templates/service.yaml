@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{.Chart.Name }}-{{required "provide CustomerName --set CustomerName=<UniqueName>" .Values.CustomerName | lower }}-clusterip"
+  labels:
+    apps: "{{.Chart.Name }}-{{.Values.CustomerName | lower}}"
+    group: {{.Chart.Name }}
+spec:
+  type: ClusterIP
+  ports:
+  - name: forwarding
+    port: {{ .Values.service_forwarding_port }}
+    targetPort: forwarding-port
+    protocol: TCP
+  selector:
+    app: {{  .Chart.Name }}-{{ .Values.CustomerName | lower }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{.Chart.Name }}-{{ .Values.CustomerName | lower }}-nodeport"
+  labels:
+    apps: "{{.Chart.Name }}-{{.Values.CustomerName | lower}}"
+    group: {{.Chart.Name }}
+spec:
+  type: NodePort
+  ports:
+  - name: sshd
+    port: {{ .Values.service_sshd_port }}
+    targetPort: sshd-port
+    protocol: TCP
+  selector:
+    app: {{  .Chart.Name }}-{{ .Values.CustomerName | lower }}

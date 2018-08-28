@@ -1,0 +1,18 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: remoteconnect
+spec:
+  rules:
+  - host: customer1.dvp.com
+    http:
+      paths:
+      - backend:
+          serviceName: rsvpcustomer1
+          servicePort: 80
+  - host: customer2.dvp.com
+    http:
+      paths:
+      - backend:
+          serviceName: rsvpcustomer2
+          servicePort: 80

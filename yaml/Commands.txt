@@ -1,0 +1,18 @@
+refresh
+
+
+
+kubectl delete deployment remoteconnect && kubectl delete service remoteconnect && kubectl create -f remoteconnect-deployment.yaml && kubectl create -f remoteconnect-service.yaml && kubectl get services
+
+docker build . -t datasourcechecker:latest && docker tag datasourcechecker:latest registry.ng.bluemix.net/dvp_node01/datasourcechecker:latest && docker push registry.ng.bluemix.net/dvp_node01/datasourcechecker:latest
+kubectl delete deployment datasourcechecker && kubectl delete service datasourcechecker && kubectl create -f yaml/datasourcechecker-deployment.yaml && kubectl create -f yaml/datasourcechecker-service.yaml && kubectl get services
+
+
+docker build . -t datasourcechecker:latest && docker tag datasourcechecker:latest registry.ng.bluemix.net/dvp_node01/datasourcechecker:latest && docker push registry.ng.bluemix.net/dvp_node01/datasourcechecker:latest && kubectl delete deployment datasourcechecker && kubectl create -f yaml/datasourcechecker-deployment.yaml && kubectl get deployments
+
+
+
+
+
+
+Expose service: Bluemix side

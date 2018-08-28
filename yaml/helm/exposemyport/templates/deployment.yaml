@@ -1,0 +1,25 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "{{.Chart.Name }}-{{required "provide CustomerName --set CustomerName=<UniqueName>" .Values.CustomerName | lower }}"
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{.Chart.Name }}-{{ .Values.CustomerName | lower }}
+        group: {{.Chart.Name }}
+    spec:
+      containers:
+      - name: {{.Chart.Name }}-app
+        image: registry.ng.bluemix.net/dvp_node01/reverse-ssh-tunnel
+        env:
+        - name: ROOT_PASS
+          value: {{ .Values.password | quote }}
+        - name: PRIVATE_HOST_TUNNEL_PORT
+          value: "9080"
+        ports:
+        - containerPort: {{ .Values.ports.container_sshd_port }}
+          name: sshd-port
+        - containerPort: {{ .Values.ports.container_forwarding_port }}
+          name: forwarding-port

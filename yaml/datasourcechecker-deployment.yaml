@@ -1,0 +1,17 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: datasourcechecker
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: datasourcechecker
+    spec:
+      containers:
+      - name: datasourcechecker-app
+        image: vandepol/exposemyport:latest
+        ports:
+        - containerPort: 9080
+          name: http

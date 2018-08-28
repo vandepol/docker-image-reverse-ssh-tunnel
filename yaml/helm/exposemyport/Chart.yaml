@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Expose My Port
+name: exposemyport
+version: 0.1.0

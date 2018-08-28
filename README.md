@@ -3,33 +3,83 @@ This container setups up a reserve ssh tunnel between a NATed host and a public 
 
 Create Image
 ------------
-To create the image `tifayuki/reverse-ssh-tunnel`, execute the following command on the tutum-docker-couchdb folder:
+To create the image `exposemyport-tunnel`, execute the following command:
 ```
-	docker build -t tifayuki/reverse-ssh-tunnel .
-```	
-Usage
+	docker build . -t exposemyport-tunnel
+```
+Usage MANUAL (HELM under development)
 -----
-On public host, run:
+To deploy to Kubernetes use the following deployment.yaml:
+
+```YAML
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: remoteconnect
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: remoteconnect
+    spec:
+      containers:
+      - name: remoteconnect-app
+        image: registry.ng.bluemix.net/dvp_node01/reverse-ssh-tunnel
+        env:
+        - name: ROOT_PASS
+          value: password *** CHANGE TO UNIQUE PASSWORD ***
+        ports:
+        - containerPort: 22
+          name: sshd-port
+        - containerPort: 1080
+          name: forwarding-port
 ```
-  docker run -d \
-    -e ROOT_PASS=<your_password> \
-    -p <your_sshd_port>:22 \
-    -p <forwarding_port>:1080 \
-    tifayuki/reverse-ssh-tunnel
-```
-Parameters:
-```
-  <your_password> is the password used for NATed host to connect the public host
-  <your_sshd port> is the port for NATed host to connect to
-  <forwarding port> is the port allows others to access
+Use for following service.yaml:
+```YAML
+apiVersion: v1
+kind: Service
+metadata:
+  name: remoteconnect
+  labels:
+    apps: remoteconnect
+spec:
+  type: NodePort
+  ports:
+  - name: sshd
+    port: 22
+    targetPort: sshd-port
+    protocol: TCP
+  - name: forwarding
+    port: 5432  *** CHANGE TO PORT YOU WANT TO FORWARD ***
+    targetPort: forwarding-port
+    protocol: TCP
+  selector:
+    app: remoteconnect
 ```
 
-On NATed Host, run:
+Determine the service ports used for the application:
+```
+$ kubectl get services
+NAME                               TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                       AGE
+remoteconnect                      NodePort    172.21.142.22    <none>        22:31445/TCP,5432:30335/TCP   47m
+```
+One the machine with the port you want to expose run the following command
+
+docker run  -e PUBLIC_HOST_ADDR=exposemyport.com -e PUBLIC_HOST_PORT=<PORT MAPPED TO 22> -e ROOT_PASS=<Password provided in deployment yaml>  -e PROXY_PORT=<Port to expose on local machine> -e PRIVATE_HOST_TUNNEL_PORT=1080 -p1080:1080 --name exposeport reverse-ssh-tunnel
+
+<you can change PRIVATE_HOST_TUNNEL_PORT if you need to run more than one at a time.
+
+
+example for postgres:
+`docker run  -e PUBLIC_HOST_ADDR=184.172.236.212 -e PUBLIC_HOST_PORT=31445 -e ROOT_PASS=password -e PROXY_PORT=5432 -e PRIVATE_HOST_TUNNEL_PORT=1080 -p1080:1080 --name exposepostgres reverse-ssh-tunnel`
+
+<!-- On NATed Host, run:
 
 ```
   docker run -d \
     -e PUBLIC_HOST_ADDR=<public_host_address> \
-    -e PUBLIC_HOST_PORT=<public_host_port> \ 
+    -e PUBLIC_HOST_PORT=<public_host_port> \
     -e ROOT_PASS=<your_password> \
     -e PROXY_PORT=<NATed_service_port> \
     --net=host \
@@ -59,4 +109,4 @@ On NATed host:
   docker run -d -e PUBLIC_HOST_ADDR=111.112.113.114 -e PUBLIC_HOST_PORT=2222 -e ROOT_PASS=mypass -e PROXY_PORT=8080 --net=host tifayuki/reverse-ssh-tunnel
 ```
 
-Then, `curl 111.112.113.114:80` will work
+Then, `curl 111.112.113.114:80` will work -->

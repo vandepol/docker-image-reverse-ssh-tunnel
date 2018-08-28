@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: datasourcechecker
+  labels:
+    apps: datasourcechecker
+spec:
+  type: NodePort
+  ports:
+  - name: http
+    port: 9080
+    targetPort: http
+    protocol: TCP
+  selector:
+    app: datasourcechecker

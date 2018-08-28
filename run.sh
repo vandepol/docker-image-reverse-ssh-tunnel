@@ -15,6 +15,9 @@ fi
 if [ "${PROXY_PORT}" == "**None**" ]; then
     unset PROXY_PORT
 fi
+if [ "${PRIVATE_HOST_TUNNEL_PORT}" == "**None**" ]; then
+    unset PRIVATE_HOST_TUNNEL_PORT
+fi
 
 SetRootPass()
 {
@@ -66,8 +69,12 @@ if [[ -n "${PUBLIC_HOST_ADDR}" && -n "${PUBLIC_HOST_PORT}" ]]; then
     cat ${KNOWN_HOSTS}
     echo "====REMOTE FINGERPRINT===="
 
+    LOCAL_HOST_IP=$(/sbin/ip route|awk '/default/ { print $3 }')
+
+    echo "hosts IP (according to /sbin/ip route) is: ${LOCAL_HOST_IP}"
     echo "=> Setting up the reverse ssh tunnel"
-    sshpass -p ${ROOT_PASS} autossh -M 0 -NgR 1080:localhost:${PROXY_PORT} root@${PUBLIC_HOST_ADDR} -p ${PUBLIC_HOST_PORT}
+    echo sshpass -p ${ROOT_PASS} autossh -M 0 -NgR ${PRIVATE_HOST_TUNNEL_PORT}:${LOCAL_HOST_IP}:${PROXY_PORT} root@${PUBLIC_HOST_ADDR} -p ${PUBLIC_HOST_PORT}
+    sshpass -p ${ROOT_PASS} autossh -M 0 -NgR ${PRIVATE_HOST_TUNNEL_PORT}:${LOCAL_HOST_IP}:${PROXY_PORT} root@${PUBLIC_HOST_ADDR} -p ${PUBLIC_HOST_PORT}
 else
     echo "=> Running in public host mode"
     if [ ! -f /.root_pw_set ]; then

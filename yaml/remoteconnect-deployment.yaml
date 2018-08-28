@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: remoteconnect
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: remoteconnect
+    spec:
+      containers:
+      - name: remoteconnect-app
+        image: registry.ng.bluemix.net/dvp_node01/reverse-ssh-tunnel
+        env:
+        - name: ROOT_PASS
+          value: password
+        ports:
+        - containerPort: 22
+          name: sshd-port
+        - containerPort: 1080
+          name: forwarding-port
+          
